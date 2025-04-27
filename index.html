@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Family Tree</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      .link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+.node text {
+  font: 12px sans-serif;
+  fill: #333;
+}
+
+.node.marriage text {
+  font-style: italic;
+  fill: #666;
+}
+    </style>
+  </head>
+  <body>
+    <div id="family-tree"></div>
+
+    <script>
+      // Sample data (same structure as before)
+      const familyData = [
+        // People
+        {
+          type: "person",
+          id: "p1",
+          name: "John Doe",
+          gender: "male",
+          marriages: ["m1", "m2"],
+        },
+        {
+          type: "person",
+          id: "p2",
+          name: "Alice Smith",
+          gender: "female",
+          marriages: ["m1", "m3"],
+        },
+        {
+          type: "person",
+          id: "p3",
+          name: "Bob Doe",
+          gender: "male",
+          marriages: ["m4"],
+        },
+        {
+          type: "person",
+          id: "p4",
+          name: "Beth Johnson",
+          gender: "female",
+          marriages: ["m2"],
+        },
+        {
+          type: "person",
+          id: "p5",
+          name: "Emily Doe",
+          gender: "female",
+          marriages: [],
+        },
+        {
+          type: "person",
+          id: "p8",
+          name: "Grace Taylor",
+          gender: "female",
+          marriages: ["m4", "m5"],
+        },
+        {
+          type: "person",
+          id: "p9",
+          name: "Sophia Doe",
+          gender: "female",
+          marriages: [],
+        },
+        {
+          type: "person",
+          id: "p7",
+          name: "Sophia Doe",
+          gender: "female",
+          marriages: [],
+        },
+
+        // Marriages
+        {
+          type: "marriage",
+          id: "m1",
+          spouseIds: ["p1", "p2"],
+          childrenIds: ["p3"],
+        },
+        {
+          type: "marriage",
+          id: "m2",
+          spouseIds: ["p1", "p4"],
+          childrenIds: ["p5"],
+        },
+        {
+          type: "marriage",
+          id: "m3",
+          spouseIds: ["p2", "p6"],
+          childrenIds: ["p7"],
+        },
+        {
+          type: "marriage",
+          id: "m4",
+          spouseIds: ["p3", "p8"],
+          childrenIds: ["p9"],
+        },
+        {
+          type: "marriage",
+          id: "m5",
+          spouseIds: ["p3", "p7"],
+          childrenIds: ["p9"],
+        },
+      ];
+      // Convert raw data to nested hierarchy
+      function buildHierarchy(personId, visited = new Set()) {
+        const person = familyData.find(
+          (d) => d.id === personId && d.type === "person"
+        );
+        if (!person || visited.has(personId)) return null;
+        visited.add(personId);
+
+        const children = [];
+
+        // Add marriages as hierarchical nodes
+        person.marriages.forEach((marriageId) => {
+          const marriage = familyData.find(
+            (d) => d.id === marriageId && d.type === "marriage"
+          );
+          if (!marriage) return;
+
+          // Create marriage node
+          const marriageNode = {
+            id: marriage.id,
+            name: `Marriage (${marriage.startDate})`,
+            type: "marriage",
+            spouse: marriage.spouseIds.find((id) => id !== personId),
+            endDate: marriage.endDate,
+            children: [],
+          };
+
+          // Add spouse and children
+          const spouse = familyData.find((d) => d.id === marriageNode.spouse);
+          if (spouse) {
+            marriageNode.children.push({
+              ...spouse,
+              name: spouse.name,
+              type: "person",
+              marriages: [], // Prevent infinite recursion
+            });
+          }
+
+          marriage.childrenIds.forEach((childId) => {
+            const child = familyData.find((d) => d.id === childId);
+            if (child) {
+              marriageNode.children.push({
+                ...child,
+                type: "person",
+                marriages: [], // Children's marriages added later
+              });
+            }
+          });
+
+          children.push(marriageNode);
+        });
+
+        return {
+          ...person,
+          type: "person",
+          children,
+        };
+      }
+
+      // Start with root person (e.g., John Doe)
+      const root = buildHierarchy("p1");
+      console.log(root, "root");
+
+      // Process data into nodes and links
+      const width = 1000,
+        height = 800;
+
+      const svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      const treeLayout = d3.tree().size([height, width - 200]); // Swap width/height for horizontal layout
+
+      const rootNode = d3.hierarchy(root);
+      treeLayout(rootNode);
+
+      // Draw links
+      svg
+        .selectAll(".link")
+        .data(rootNode.links())
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr(
+          "d",
+          d3
+            .linkHorizontal()
+            .x((d) => d.y)
+            .y((d) => d.x)
+        );
+
+      // Draw nodes
+      const node = svg
+        .selectAll(".node")
+        .data(rootNode.descendants())
+        .enter()
+        .append("g")
+        .attr("class", (d) => `node ${d.data.type}`)
+        .attr("transform", (d) => `translate(${d.y},${d.x})`);
+
+      // Add circles
+      node
+        .filter((d) => d.data.type === "person")
+        .append("circle")
+        .attr("r", 15)
+        .attr("fill", (d) =>
+          d.data.gender === "male" ? "#64B5F6" : "#F06292"
+        );
+
+      // Add marriage rectangles
+      node
+        .filter((d) => d.data.type === "marriage")
+        .append("rect")
+        .attr("width", 30)
+        .attr("height", 10)
+        .attr("y", -5)
+        .attr("fill", (d) => (d.data.endDate ? "#ef9a9a" : "#a5d6a7"));
+
+      // Add labels
+      node
+        .append("text")
+        .attr("dx", (d) => (d.data.type === "marriage" ? 20 : 0))
+        .attr("dy", 4)
+        .text((d) => d.data.name)
+        .clone(true)
+        .lower()
+        .attr("stroke", "white");
+    </script>
+  </body>
+</html>
