@@ -4,9 +4,22 @@
     <meta charset="UTF-8" />
     <title>D3 Family Tree Example</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      .tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        pointer-events: none;
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <svg width="960" height="600"></svg>
+    <div id="tooltip" class="tooltip"></div>
 
     <script>
       const data = {
@@ -50,19 +63,29 @@
           },
         ],
       };
-      const width = 960;
-      const height = 600;
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
 
       const svg = d3.select("svg").attr("width", width).attr("height", height);
 
-      const root = d3.hierarchy(data);
+      // Add zoom behavior
+      const g = svg.append("g");
 
+      const zoom = d3
+        .zoom()
+        .scaleExtent([0.5, 3])
+        .on("zoom", (event) => {
+          g.attr("transform", event.transform);
+        });
+      svg.call(zoom);
+
+      const root = d3.hierarchy(data);
       const treeLayout = d3.tree().size([width - 100, height - 100]);
       treeLayout(root);
 
       // Draw links
-      svg
-        .selectAll("line.link")
+      g.selectAll("line.link")
         .data(root.links())
         .enter()
         .append("line")
@@ -73,19 +96,40 @@
         .attr("y2", (d) => d.target.y + 50)
         .attr("stroke", "#555");
 
+      // Tooltip div
+      const tooltip = d3.select("#tooltip");
+
       // Draw nodes
-      const node = svg
+      const node = g
         .selectAll("g.node")
         .data(root.descendants())
         .enter()
         .append("g")
         .attr("class", "node")
-        .attr("transform", (d) => `translate(${d.x + 50}, ${d.y + 50})`);
-
-      // node
-      //   .append("circle")
-      //   .attr("r", 30)
-      //   .attr("fill", (d) => (d.data.gender === "M" ? "#88c" : "#c88"));
+        .attr("transform", (d) => `translate(${d.x + 50}, ${d.y + 50})`)
+        .on("mouseover", function (event, d) {
+          tooltip
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY - 20 + "px")
+            .style("display", "inline-block")
+            .html(
+              `<strong>${d.data.name}</strong><br>Gender: ${d.data.gender}<br>Mother: ${d.data.mo}<br>Father: ${d.data.fa}`
+            );
+          d3.select(this)
+            .select("rect")
+            .style("stroke", "orange")
+            .style("stroke-width", 3);
+        })
+        .on("mouseout", function (event, d) {
+          tooltip.style("display", "none");
+          d3.select(this)
+            .select("rect")
+            .style("stroke", "#000")
+            .style("stroke-width", 1);
+        })
+        .on("click", function (event, d) {
+          alert(`Clicked on ${d.data.name}`);
+        });
 
       node
         .append("rect")
@@ -98,14 +142,14 @@
 
       node
         .append("text")
-        .attr("dy", 6) // move the name slightly lower
+        .attr("dy", 6)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .text((d) => `${d.data.name}`);
 
       node
         .append("text")
-        .attr("dy", 24) // move the second line lower (since circle is bigger)
+        .attr("dy", 24)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .style("font-size", "10px")
