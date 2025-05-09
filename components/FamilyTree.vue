@@ -13,9 +13,10 @@ import { UserService } from '~/services/UserService'
 const svg = ref(null)
 const users = ref({})
 const mountTree = () => {
-    
+
 
     const width = window.innerWidth
+    console.log(width, 'width');
     const height = window.innerHeight
 
     const svg = d3.select("svg").attr("width", width).attr("height", height);
@@ -32,9 +33,36 @@ const mountTree = () => {
     svg.call(zoom);
 
     const root = d3.hierarchy(users.value[0]);
-    const treeLayout = d3.tree().size([width - 100, height - 100]);
+    const treeLayout = d3.tree().size([width - 100, height - 100]).separation((a, b) => (a.parent == b.parent ? 1 : 2));;
     treeLayout(root);
 
+    function dragStarted(event, d) {
+        d3.select(this).raise().attr("stroke", "black");
+    }
+
+    function dragged(event, d) {
+        d.x = event.x - 50;
+        d.y = event.y - 50;
+        d3.select(this)
+            .attr("transform", `translate(${event.x}, ${event.y})`);
+
+        // Update connected links (optional but useful!)
+        g.selectAll("line.link")
+            .filter(l => l.source === d || l.target === d)
+            .attr("x1", l => l.source.x + 50)
+            .attr("y1", l => l.source.y + 50)
+            .attr("x2", l => l.target.x + 50)
+            .attr("y2", l => l.target.y + 50);
+    }
+
+    function dragEnded(event, d) {
+        d3.select(this).attr("stroke", null);
+    }
+
+    const drag = d3.drag()
+        .on("start", dragStarted)
+        .on("drag", dragged)
+        .on("end", dragEnded);
     // Draw links
     g.selectAll("line.link")
         .data(root.links())
@@ -58,6 +86,7 @@ const mountTree = () => {
         .append("g")
         .attr("class", "node")
         .attr("transform", (d) => `translate(${d.x + 50}, ${d.y + 50})`)
+        .call(drag)
         .on("mouseover", function (event, d) {
             tooltip
                 .style("left", event.pageX + 10 + "px")
