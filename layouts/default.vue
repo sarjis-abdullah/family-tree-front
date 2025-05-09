@@ -32,7 +32,7 @@
                             </template>
 
                             <v-list>
-                                <v-list-item v-for="(item, index) in navs" :key="index" :value="index">
+                                <v-list-item v-for="(item, index) in navs" :key="index" :value="index" :to="item.to">
                                     <template v-slot:prepend>
                                         <v-icon class="" color="primary" size="small" style="cursor: pointer">
                                             {{ item.icon }}

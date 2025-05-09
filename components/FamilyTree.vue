@@ -84,9 +84,9 @@ const mountTree = () => {
 
     node
         .append("rect")
-        .attr("width", 120)
+        .attr("width", 200)
         .attr("height", 60)
-        .attr("x", -60)
+        .attr("x", -100)
         .attr("y", -20)
         .style("fill", (d) => (d.data.gender === "M" ? "#88c" : "#c88"))
         .style("stroke", "#000");
@@ -105,7 +105,7 @@ const mountTree = () => {
         .attr("dominant-baseline", "middle")
         .style("font-size", "10px")
         .style("fill", "#666")
-        .text((d) => `Mother: ${d.data.mo}`);
+        .text((d) => d.data.mother_name ? `Mother: ${d.data.mother_name}` : "");
 }
 const loadUsers = async () => {
     const response = await UserService.getTree('')
