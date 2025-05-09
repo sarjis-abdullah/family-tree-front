@@ -1,7 +1,8 @@
 <template>
     <section>
+        <client-only>
         <AddNewFamilyMember />
-
+    </client-only>
     </section>
 </template>
 
