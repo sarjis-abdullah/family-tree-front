@@ -28,7 +28,7 @@ const mountTree = () => {
     svg.call(zoom);
 
     const root = d3.hierarchy(users.value[0]);
-    const treeLayout = d3.tree().size([width - 100, height - 100]).separation((a, b) => (a.parent == b.parent ? 1 : 2));
+    const treeLayout = d3.tree().size([height - 100, width - 100]).separation((a, b) => (a.parent == b.parent ? 1 : 2));
     treeLayout(root);
 
     // Draw links
@@ -37,10 +37,10 @@ const mountTree = () => {
         .enter()
         .append("line")
         .attr("class", "link")
-        .attr("x1", (d) => d.source.x + 50)
-        .attr("y1", (d) => d.source.y + 50)
-        .attr("x2", (d) => d.target.x + 50)
-        .attr("y2", (d) => d.target.y + 50)
+        .attr("x1", (d) => d.source.y + 50)
+        .attr("y1", (d) => d.source.x + 50)
+        .attr("x2", (d) => d.target.y + 50)
+        .attr("y2", (d) => d.target.x + 50)
         .attr("stroke", "#555");
 
     const tooltip = d3.select("#tooltip");
@@ -50,7 +50,7 @@ const mountTree = () => {
         .enter()
         .append("g")
         .attr("class", "node")
-        .attr("transform", (d) => `translate(${d.x + 50}, ${d.y + 50})`)
+        .attr("transform", (d) => `translate(${d.y + 50}, ${d.x + 50})`)
         .on("mouseover", function (event, d) {
             tooltip
                 .style("left", event.pageX + 10 + "px")
@@ -106,8 +106,8 @@ const mountTree = () => {
 
     function dragged(event, d) {
         // Calculate the movement delta
-        const dx = event.dx;
-        const dy = event.dy;
+        const dx = event.dy;
+        const dy = event.dx;
 
         // Move all nodes in the subtree
         nodes.filter(n => d.subtree.includes(n))
@@ -115,20 +115,20 @@ const mountTree = () => {
                 n.x += dx;
                 n.y += dy;
                 d3.select(this)
-                    .attr("transform", `translate(${n.x + 50}, ${n.y + 50})`);
+                    .attr("transform", `translate(${n.y + 50}, ${n.x + 50})`);
             });
 
         // Update links
         links.each(function (l) {
             if (d.subtree.includes(l.source)) {
                 d3.select(this)
-                    .attr("x1", l.source.x + 50)
-                    .attr("y1", l.source.y + 50);
+                    .attr("x1", l.source.y + 50)
+                    .attr("y1", l.source.x + 50);
             }
             if (d.subtree.includes(l.target)) {
                 d3.select(this)
-                    .attr("x2", l.target.x + 50)
-                    .attr("y2", l.target.y + 50);
+                    .attr("x2", l.target.y + 50)
+                    .attr("y2", l.target.x + 50);
             }
         });
     }
