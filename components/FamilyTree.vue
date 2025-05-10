@@ -14,7 +14,14 @@ const svg = ref(null)
 const users = ref({})
 const mountTree = () => {
     const width = window.innerWidth
-    const height = window.innerHeight
+    const root = d3.hierarchy(users.value[0]);
+
+    // Dynamic height based on both depth and number of nodes
+    const totalNodes = root.descendants().length;
+    const maxDepth = root.height;
+
+    // Choose whichever is bigger
+    const height = Math.max(1000, totalNodes * 80, (maxDepth + 1) * 150);
 
     const svg = d3.select("svg").attr("width", width).attr("height", height);
     const g = svg.append("g");
@@ -27,7 +34,7 @@ const mountTree = () => {
         });
     svg.call(zoom);
 
-    const root = d3.hierarchy(users.value[0]);
+    // const root = d3.hierarchy(users.value[0]);
     const treeLayout = d3.tree().size([height - 100, width - 100]).separation((a, b) => (a.parent == b.parent ? 1 : 2));
     treeLayout(root);
 
@@ -89,6 +96,13 @@ const mountTree = () => {
         .attr("dominant-baseline", "middle")
         .text((d) => `${d.data.name}`);
 
+    nodes.append("text")
+        .attr("dy", -30)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#666")
+        .text((d) => `Generation: ${d.depth + 1}`);
     nodes.append("text")
         .attr("dy", 24)
         .attr("text-anchor", "middle")
