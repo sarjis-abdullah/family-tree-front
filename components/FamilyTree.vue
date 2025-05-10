@@ -13,15 +13,10 @@ import { UserService } from '~/services/UserService'
 const svg = ref(null)
 const users = ref({})
 const mountTree = () => {
-
-
     const width = window.innerWidth
-    console.log(width, 'width');
     const height = window.innerHeight
 
     const svg = d3.select("svg").attr("width", width).attr("height", height);
-
-    // Add zoom behavior
     const g = svg.append("g");
 
     const zoom = d3
@@ -33,38 +28,11 @@ const mountTree = () => {
     svg.call(zoom);
 
     const root = d3.hierarchy(users.value[0]);
-    const treeLayout = d3.tree().size([width - 100, height - 100]).separation((a, b) => (a.parent == b.parent ? 1 : 2));;
+    const treeLayout = d3.tree().size([width - 100, height - 100]).separation((a, b) => (a.parent == b.parent ? 1 : 2));
     treeLayout(root);
 
-    function dragStarted(event, d) {
-        d3.select(this).raise().attr("stroke", "black");
-    }
-
-    function dragged(event, d) {
-        d.x = event.x - 50;
-        d.y = event.y - 50;
-        d3.select(this)
-            .attr("transform", `translate(${event.x}, ${event.y})`);
-
-        // Update connected links (optional but useful!)
-        g.selectAll("line.link")
-            .filter(l => l.source === d || l.target === d)
-            .attr("x1", l => l.source.x + 50)
-            .attr("y1", l => l.source.y + 50)
-            .attr("x2", l => l.target.x + 50)
-            .attr("y2", l => l.target.y + 50);
-    }
-
-    function dragEnded(event, d) {
-        d3.select(this).attr("stroke", null);
-    }
-
-    const drag = d3.drag()
-        .on("start", dragStarted)
-        .on("drag", dragged)
-        .on("end", dragEnded);
     // Draw links
-    g.selectAll("line.link")
+    const links = g.selectAll("line.link")
         .data(root.links())
         .enter()
         .append("line")
@@ -75,18 +43,14 @@ const mountTree = () => {
         .attr("y2", (d) => d.target.y + 50)
         .attr("stroke", "#555");
 
-    // Tooltip div
     const tooltip = d3.select("#tooltip");
 
-    // Draw nodes
-    const node = g
-        .selectAll("g.node")
+    const nodes = g.selectAll("g.node")
         .data(root.descendants())
         .enter()
         .append("g")
         .attr("class", "node")
         .attr("transform", (d) => `translate(${d.x + 50}, ${d.y + 50})`)
-        .call(drag)
         .on("mouseover", function (event, d) {
             tooltip
                 .style("left", event.pageX + 10 + "px")
@@ -111,8 +75,7 @@ const mountTree = () => {
             alert(`Clicked on ${d.data.name}`);
         });
 
-    node
-        .append("rect")
+    nodes.append("rect")
         .attr("width", 200)
         .attr("height", 60)
         .attr("x", -100)
@@ -120,28 +83,75 @@ const mountTree = () => {
         .style("fill", (d) => (d.data.gender === "M" ? "#88c" : "#c88"))
         .style("stroke", "#000");
 
-    node
-        .append("text")
+    nodes.append("text")
         .attr("dy", 6)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .text((d) => `${d.data.name}`);
 
-    node
-        .append("text")
+    nodes.append("text")
         .attr("dy", 24)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .style("font-size", "10px")
         .style("fill", "#666")
         .text((d) => d.data.mother_name ? `Mother: ${d.data.mother_name}` : "");
+
+    function dragStarted(event, d) {
+        d3.select(this).raise().attr("stroke", "black");
+
+        // Find all descendants (subtree)
+        d.subtree = d.descendants();
+    }
+
+    function dragged(event, d) {
+        // Calculate the movement delta
+        const dx = event.dx;
+        const dy = event.dy;
+
+        // Move all nodes in the subtree
+        nodes.filter(n => d.subtree.includes(n))
+            .each(function (n) {
+                n.x += dx;
+                n.y += dy;
+                d3.select(this)
+                    .attr("transform", `translate(${n.x + 50}, ${n.y + 50})`);
+            });
+
+        // Update links
+        links.each(function (l) {
+            if (d.subtree.includes(l.source)) {
+                d3.select(this)
+                    .attr("x1", l.source.x + 50)
+                    .attr("y1", l.source.y + 50);
+            }
+            if (d.subtree.includes(l.target)) {
+                d3.select(this)
+                    .attr("x2", l.target.x + 50)
+                    .attr("y2", l.target.y + 50);
+            }
+        });
+    }
+
+    function dragEnded(event, d) {
+        d3.select(this).attr("stroke", null);
+        d.subtree = null;  // Clean up
+    }
+
+    const drag = d3.drag()
+        .on("start", dragStarted)
+        .on("drag", dragged)
+        .on("end", dragEnded);
+
+    nodes.call(drag);
 }
+
 const loadUsers = async () => {
     const response = await UserService.getTree('')
-    console.log(response);
     users.value = response.data.original;
     mountTree()
 }
+
 onMounted(() => {
     loadUsers();
 });
