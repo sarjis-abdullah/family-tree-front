@@ -96,13 +96,13 @@ const mountTree = () => {
         .attr("dominant-baseline", "middle")
         .text((d) => `${d.data.name}`);
 
-    nodes.append("text")
-        .attr("dy", -30)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#666")
-        .text((d) => `Generation: ${d.depth + 1}`);
+    // nodes.append("text")
+    //     .attr("dy", -30)
+    //     .attr("text-anchor", "middle")
+    //     .attr("dominant-baseline", "middle")
+    //     .style("font-size", "12px")
+    //     .style("fill", "#666")
+    //     .text((d) => `Generation: ${d.depth + 1}`);
     nodes.append("text")
         .attr("dy", 24)
         .attr("text-anchor", "middle")
@@ -158,6 +158,26 @@ const mountTree = () => {
         .on("end", dragEnded);
 
     nodes.call(drag);
+    // Get the unique depths
+    const depths = Array.from(new Set(root.descendants().map(d => d.depth)));
+
+    // Add labels for each depth level
+    depths.forEach(depth => {
+        const nodesAtDepth = root.descendants().filter(d => d.depth === depth);
+        const avgX = d3.mean(nodesAtDepth, d => d.x);
+
+        // Add depth label at the left side of that column
+        const label = g.append("text")
+            .attr("x", nodesAtDepth[0].y)  // depth column y-position
+            .attr("y", 10)  // fixed height at top
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("font-weight", "bold")
+            .text(`Generation: ${depth + 1}`)
+            .style("fill", "#444")  // dark grey text
+            .style("background", "#eee");
+    });
+
 }
 
 const loadUsers = async () => {
