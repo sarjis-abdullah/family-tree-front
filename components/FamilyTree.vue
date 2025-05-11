@@ -28,7 +28,7 @@ const mountTree = () => {
 
     const zoom = d3
         .zoom()
-        .scaleExtent([0.5, 3])
+        .scaleExtent([0.1, 3])
         .on("zoom", (event) => {
             g.attr("transform", event.transform);
         });
@@ -37,6 +37,43 @@ const mountTree = () => {
     // const root = d3.hierarchy(users.value[0]);
     const treeLayout = d3.tree().size([height - 100, width - 100]).separation((a, b) => (a.parent == b.parent ? 1 : 2));
     treeLayout(root);
+
+    // Get all nodes' positions (x, y)
+    const nodes2 = root.descendants();
+
+    // Calculate bounds
+    const xExtent = d3.extent(nodes2, d => d.x);
+    const yExtent = d3.extent(nodes2, d => d.y);
+
+    // Calculate size of tree in pixels
+    const treeWidth = yExtent[1] - yExtent[0];
+    const treeHeight = xExtent[1] - xExtent[0];
+
+    // Padding (optional)
+    const padding = 40;
+
+    // Available SVG size
+    const svgWidth = +svg.attr("width");
+    const svgHeight = +svg.attr("height");
+
+    // Calculate scale to fit the tree (keep aspect ratio)
+    const scale = Math.min(
+        (svgWidth - padding * 2) / treeWidth,
+        (svgHeight - padding * 2) / treeHeight
+    );
+
+    // Calculate the center offset
+    const offsetX = (svgWidth - (treeWidth * scale)) / 2;
+    const offsetY = (svgHeight - (treeHeight * scale)) / 2;
+
+    // Initial transform
+    const initialTransform = d3.zoomIdentity
+        .translate(offsetX - (yExtent[0] * scale), offsetY - (xExtent[0] * scale))
+        .scale(scale);
+
+    // Apply zoom
+
+    svg.call(zoom.transform, initialTransform);
 
     // Draw links
     const links = g.selectAll("line.link")
