@@ -1,6 +1,6 @@
 <template>
     <section>
-        <FamilyTree />
+        <FamilyTree v-if="rootNode && Object.keys(rootNode).length" :rootNode="rootNode"/>
 
     </section>
 </template>
@@ -8,8 +8,19 @@
 
 <script setup>
 import FamilyTree from '~/components/FamilyTree.vue';
+import { UserService } from '~/services/UserService'
+
 definePageMeta({
     layout: "default",
+});
+const rootNode = ref({})
+const loadUsers = async () => {
+    const response = await UserService.getTree('')
+    rootNode.value = response?.data?.original[0];
+}
+
+onMounted(() => {
+    loadUsers()
 });
 </script>
 

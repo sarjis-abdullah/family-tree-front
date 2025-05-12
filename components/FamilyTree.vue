@@ -8,13 +8,18 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import * as d3 from 'd3'
-import { UserService } from '~/services/UserService'
 
+const {rootNode} = defineProps({
+    rootNode: {
+        type: Object,
+        required: true,
+        default: ()=> ({})
+    }
+})
 const svg = ref(null)
-const users = ref({})
 const mountTree = () => {
     const width = window.innerWidth;
-    const root = d3.hierarchy(users.value[0]);
+    const root = d3.hierarchy(rootNode);
 
     const height = calculateDynamicHeight(root);
     const svg = setupSVG(width, height);
@@ -188,15 +193,8 @@ function labelGenerations(g, root) {
     });
 }
 
-
-const loadUsers = async () => {
-    const response = await UserService.getTree('')
-    users.value = response.data.original;
-    mountTree()
-}
-
 onMounted(() => {
-    loadUsers();
+    mountTree()
 });
 </script>
 
