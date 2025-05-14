@@ -66,9 +66,9 @@ const navs = [
         to: '/family-tree'
     },
     {
-        title: 'Settings',
-        icon: 'mdi-cog',
-        to: '/settings'
+        title: 'Find Relationship',
+        icon: 'mdi-account-search',
+        to: '/find-relationship'
     }
 ]
 </script>

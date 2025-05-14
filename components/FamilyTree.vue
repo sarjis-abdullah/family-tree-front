@@ -9,17 +9,31 @@
 import { onMounted, ref } from 'vue'
 import * as d3 from 'd3'
 
-const {rootNode} = defineProps({
+const { rootNode } = defineProps({
     rootNode: {
         type: Object,
         required: true,
-        default: ()=> ({})
+        default: () => ({})
     }
 })
 const svg = ref(null)
 const mountTree = () => {
+    function getTreeDepth(node) {
+        if (!node.children || node.children.length === 0) return 1
+        return 1 + Math.max(...node.children.map(getTreeDepth))
+    }
+    
+
     const width = window.innerWidth;
     const root = d3.hierarchy(rootNode);
+
+    /**
+     * 
+     *  const depth = getTreeDepth(root)
+        const nodeWidth = 180 // pixels per depth level
+        const width = Math.max(600, depth * nodeWidth) * 2
+        console.log(width, window.innerWidth);
+     */
 
     const height = calculateDynamicHeight(root);
     const svg = setupSVG(width, height);

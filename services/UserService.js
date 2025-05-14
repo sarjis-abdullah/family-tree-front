@@ -16,6 +16,13 @@ export class UserService {
       throw err;
     }
   }
+  static async findRelationship(query='') {
+    try {
+      return await HttpRequester.get(`find-relationship${query}`);
+    } catch (err) {
+      throw err;
+    }
+  }
   static async create(data) {
     try {
       return await HttpRequester.post('user', data);
