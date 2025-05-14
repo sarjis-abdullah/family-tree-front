@@ -22,7 +22,7 @@ const mountTree = () => {
         if (!node.children || node.children.length === 0) return 1
         return 1 + Math.max(...node.children.map(getTreeDepth))
     }
-    
+
 
     const width = window.innerWidth;
     const root = d3.hierarchy(rootNode);
@@ -96,7 +96,7 @@ function calculateInitialTransform(svg, nodes) {
 
     return d3.zoomIdentity
         .translate(offsetX - (yExtent[0] * scale), offsetY - (xExtent[0] * scale))
-        .scale(scale);
+        .scale(.6);
 }
 
 function drawLinks(g, root) {
@@ -135,27 +135,53 @@ function drawNodes(g, nodes, tooltip) {
             alert(`Clicked on ${d.data.name}`);
         });
 
-    nodeGroup.append("rect")
-        .attr("width", 200)
+    // nodeGroup.append("rect")
+    //     .attr("width", 200)
+    //     .attr("height", 60)
+    //     .attr("x", -100)
+    //     .attr("y", -20)
+    //     .style("fill", d => (d.data.gender === "male" ? "#337ab7" : "#c88"))
+    //     .style("stroke", "#000");
+
+    nodeGroup.append("foreignObject")
+    .attr("width", 200)
         .attr("height", 60)
         .attr("x", -100)
         .attr("y", -20)
-        .style("fill", d => (d.data.gender === "M" ? "#88c" : "#c88"))
-        .style("stroke", "#000");
+        .html(d => `
+        <div xmlns="http://www.w3.org/1999/xhtml" 
+             class="node-text wordwrap" 
+             style="
+           background: #337ab7;
+           color: white;
+           padding: 12px;
+           border-radius: 8px;
+            box-shadow: 0px 0px 6px rgba(0,0,0,0.4);
+           font-size: 12px;
+           width: 110px;
+           overflow: hidden;
+         ">
+            <b>${d.data.name}</b><br>
+            <span>
+            ${d.data.mother_name ? '<b>Mother: </b>' + d.data.mother_name + '<br>' : ''}
+            </span>
+        </div>
+    `);
 
-    nodeGroup.append("text")
-        .attr("dy", 6)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .text(d => d.data.name);
+    // nodeGroup.append("text")
+    //     .attr("dy", 6)
+    //     .attr("text-anchor", "middle")
+    //     .attr("dominant-baseline", "middle")
+    //     .style("fill", "#fff")
+    //     .text(d => d.data.name);
 
-    nodeGroup.append("text")
-        .attr("dy", 24)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", "10px")
-        .style("fill", "#666")
-        .text(d => d.data.mother_name ? `Mother: ${d.data.mother_name}` : "");
+    // nodeGroup.append("text")
+    //     .attr("dy", 24)
+    //     .attr("text-anchor", "middle")
+    //     .attr("dominant-baseline", "middle")
+    //     .style("font-size", "10px")
+    //     .style("fill", "#fff")
+    //     .text(d => d.data.mother_name ? `Mother: ${d.data.mother_name}` : "");
 
     return nodeGroup;
 }
@@ -228,5 +254,11 @@ onMounted(() => {
     font-size: 12px;
     pointer-events: none;
     display: none;
+}
+
+.node-text.wordwrap {
+    word-wrap: break-word;
+    overflow: hidden;
+    text-align: left;
 }
 </style>
