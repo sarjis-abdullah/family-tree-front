@@ -145,14 +145,14 @@ function drawNodes(g, nodes, tooltip) {
 
     nodeGroup.append("foreignObject")
     .attr("width", 200)
-        .attr("height", 60)
+        .attr("height", 80)
         .attr("x", -100)
         .attr("y", -20)
         .html(d => `
         <div xmlns="http://www.w3.org/1999/xhtml" 
              class="node-text wordwrap" 
              style="
-           background: #337ab7;
+           background: ${d.data.gender == 'male' ? '#337ab7' : '#9467bd'};
            color: white;
            padding: 12px;
            border-radius: 8px;
