@@ -6,8 +6,11 @@
                     <v-list>
                         <v-list-item :subtitle="'History & connections'" :title="'KS Family'">
                             <template v-slot:prepend>
-                                <v-avatar :color="'blue'">
-                                    <v-icon color="white">mdi-account-group</v-icon>
+                                <v-avatar :color="'blue'" src>
+                                    <v-img
+                                        alt="John"
+                                        src="/logo.jpg"
+                                    ></v-img>
                                 </v-avatar>
                             </template>
                         </v-list-item>
@@ -56,7 +59,7 @@
 <script setup>
 const navs = [
     {
-        title: 'Add Family Member',
+        title: 'Membership',
         icon: 'mdi-account-plus',
         to: '/add-member'
     },

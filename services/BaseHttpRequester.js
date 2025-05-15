@@ -5,11 +5,14 @@ export class BaseHttpRequester {
   }
   static getHeaders() {
     const token = this.getToken();
-    return {
+    const obj = {
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json", // Adjust content type as needed
       },
     };
+    if (token) {
+      obj.headers.Authorization = `Bearer ${token}`;
+    }
+    return obj
   }
 }
