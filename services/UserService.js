@@ -30,6 +30,13 @@ export class UserService {
       throw err;
     }
   }
+  static async register(data) {
+    try {
+      return await HttpRequester.post('register', data);
+    } catch (err) {
+      throw err;
+    }
+  }
   static async login(data) {
     try {
       return await HttpRequester.post('login', data);
