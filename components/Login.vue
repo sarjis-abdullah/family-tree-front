@@ -63,46 +63,23 @@
 import { ref } from 'vue'
 import { UserService } from '~/services/UserService'
 import { useDisplay } from 'vuetify'
+import { saveToken } from '~/storage/tokenStorage'
 
 const { mdAndUp } = useDisplay()
 const form = ref(null)
 
-const genders = [
-    'Male',
-    'Female',
-]
-
 const email = ref('')
 const password = ref()
-const motherId = ref()
-const fatherId = ref()
-const birthDate = ref()
 const emailRules = ref([
     v => !!v || 'Email is required',
-    // v => (v && v.length >= 3) || 'Name must be 3 characters atleast',
 ])
 const passwordRules = ref([
     v => !!v || 'Password is required',
 ])
-// const motherRules = ref([
-//     v => !!v || 'Mother name is required',
-// ])
-// const fatherRules = ref([
-//     v => !!v || 'Father name is required',
-// ])
 const gender = ref('')
 const loading = ref(false)
 const showInfo = computed(() => {
     return gender.value && gender.value.toLowerCase() === 'female'
-})
-const motherRules = computed(() => {
-    return []
-})
-
-const fatherRules = computed(() => {
-    return !showInfo.value
-        ? [(v) => !!v || 'Father name is required']
-        : []
 })
 
 const userData = computed(() => {
@@ -115,67 +92,22 @@ const userData = computed(() => {
 onMounted(() => {
     reset()
 })
-const motherDataLoading = ref(false)
-const fathersDataLoading = ref(false)
-const searchQuery = '&gender='
-const getAllMothers = async (search = '') => {
 
-    const query = search.length ? `?query=${search}&gender=female` : ''
-    UserService.getAll(query)
-        .then((response) => {
-            console.log(response.data, 'response');
-            mothersData.value = response.data
-        })
-        .catch((error) => {
-            console.error(error);
-        })
-        .finally(() => {
-            motherDataLoading.value = false
-            fathersDataLoading.value = false
-        })
-}
-const getAllFathers = async (search = '') => {
-
-    const query = search.length ? `?query=${search}&gender=male` : ''
-    UserService.getAll(query)
-        .then((response) => {
-            fathersData.value = response.data
-        })
-        .catch((error) => {
-            console.error(error);
-        })
-        .finally(() => {
-            motherDataLoading.value = false
-            fathersDataLoading.value = false
-        })
-}
-const onMotherSearch = (search) => {
-    if (search && search.length) {
-        motherDataLoading.value = true
-        getAllMothers(search)
-    } else {
-        // mothersData.value = []
-    }
-}
-const onFatherSearch = (search) => {
-    if (search && search.length) {
-        fathersDataLoading.value = true
-        getAllFathers(search)
-    } else {
-        mothersData.value = []
-    }
-}
 const validate = async () => {
-    console.log(form.value);
     const { valid } = await form.value.validate()
 
     if (valid) login()
 }
+const router = useRouter()
 const login = async () => {
     loading.value = true
     UserService.login(userData.value)
         .then((response) => {
             console.log(response);
+            if (response.accessToken) {
+                saveToken(response.accessToken)
+                router.push({ name: 'dashboard' })
+            }
         })
         .catch((error) => {
             console.error(error);
@@ -185,13 +117,9 @@ const login = async () => {
             reset()
         })
 }
-const onInfoClick = () => {
 
-}
 function reset() {
     form.value.reset()
-    motherId.value = null
-    fatherId.value = null
 }
 function resetValidation() {
     form.value.resetValidation()

@@ -150,13 +150,13 @@ const register = async () => {
     UserService.register(userData.value)
         .then((response) => {
             console.log(response);
+            reset()
         })
         .catch((error) => {
             console.error(error);
         })
         .finally(() => {
             loading.value = false
-            reset()
         })
 }
 const onInfoClick = () => {
