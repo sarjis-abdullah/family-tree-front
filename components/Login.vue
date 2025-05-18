@@ -63,7 +63,7 @@
 import { ref } from 'vue'
 import { UserService } from '~/services/UserService'
 import { useDisplay } from 'vuetify'
-import { saveToken } from '~/storage/tokenStorage'
+import { saveToken, saveUser } from '~/storage/tokenStorage'
 
 const { mdAndUp } = useDisplay()
 const form = ref(null)
@@ -106,7 +106,9 @@ const login = async () => {
             console.log(response);
             if (response.accessToken) {
                 saveToken(response.accessToken)
-                router.push({ name: 'dashboard' })
+                saveUser(response.user)
+                window.location.href = '/dashboard'
+                // router.push({ name: 'dashboard' })
             }
         })
         .catch((error) => {

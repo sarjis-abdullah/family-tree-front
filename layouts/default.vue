@@ -72,7 +72,7 @@ import { useDisplay } from 'vuetify'
 const { mdAndUp } = useDisplay()
 import { useAuth } from '@/composables/useAuth'
 
-const { isAuthenticated } = useAuth()
+const { isAuthenticated, authUser, hasAuthUserMembership } = useAuth()
 
 const profileNavs = computed(() => {
     return [

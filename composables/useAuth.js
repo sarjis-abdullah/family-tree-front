@@ -1,30 +1,45 @@
 // src/composables/useAuth.js
 import { ref } from "vue";
 
-const ACCESS_TOKEN_KEY = "access_token";
+const ACCESS_TOKEN_KEY_KEY = "ACCESS_TOKEN_KEY";
 const USER_KEY = "logged_in_user";
 
-const token = computed(() => {
-  //   const token = useStorage(ACCESS_TOKEN_KEY, null); // persists in localStorage
-  //   return token ? token : null;
-  //   const user = useStorage(USER_KEY, null);
-  if (window !== "undefined" && window !== null && window?.localStorage) {
-    const token = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+const isWindowLoaded = computed(() => {
+    if (window !== "undefined" && window !== null && window?.localStorage) {
+      return true;
+    }
+    return false;
+  });
+const authToken = computed(() => {
+  if (isWindowLoaded.value) {
+    const token = window.localStorage.getItem(ACCESS_TOKEN_KEY_KEY);
     return token ? token : null;
   }
   return "";
 });
-// const user = ref(JSON.parse(localStorage.getItem(USER_KEY)) || null);
 
 export function useAuth() {
-  const isAuthenticated = ref(!!token.value);
+  const isAuthenticated = computed(() => !!authToken.value);
 
+  const authUser = computed(() => {
+    if (isWindowLoaded.value) {
+      const user = window.localStorage.getItem(USER_KEY);
+      return user ? JSON.parse(user) : null;
+    }
+    return null;
+  });
 
-  //   const getUser = () => user.value;
+  const hasAuthUserMembership = computed(() => {
+    const user = authUser.value;
+    if (user && user.has_membership) {
+      return user.has_membership;
+    }
+    return false;
+  });
 
   return {
-
-    // getUser,
     isAuthenticated,
+    authUser,
+    hasAuthUserMembership
   };
 }

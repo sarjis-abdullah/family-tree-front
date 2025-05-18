@@ -1,6 +1,6 @@
 export default defineNuxtRouteMiddleware((to, from) => {
     if (process.client) {
-      const token = localStorage.getItem('access_token')
+      const token = localStorage.getItem('ACCESS_TOKEN_KEY')
   
       // Redirect unauthenticated users trying to access protected routes
       if (!token && to.path !== '/login') {
