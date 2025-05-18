@@ -82,9 +82,9 @@ const profileNavs = computed(() => {
             to: '/profile'
         },
         {
-            title: 'Settings',
+            title: 'Your activities',
             icon: 'mdi-cog',
-            to: '/settings'
+            to: '/activities'
         },
         {
             title: 'Logout',

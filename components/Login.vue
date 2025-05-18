@@ -101,7 +101,7 @@ const validate = async () => {
 const router = useRouter()
 const login = async () => {
     loading.value = true
-    UserService.login(userData.value)
+    UserService.login(userData.value, '?include=user.members')
         .then((response) => {
             console.log(response);
             if (response.accessToken) {

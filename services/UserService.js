@@ -37,9 +37,13 @@ export class UserService {
       throw err;
     }
   }
-  static async login(data) {
+  static async login(data, query='') {
     try {
-      return await HttpRequester.post('login', data);
+      let url = 'login';
+      if (query) {
+        url = url + query;
+      }
+      return await HttpRequester.post(url, data);
     } catch (err) {
       throw err;
     }
