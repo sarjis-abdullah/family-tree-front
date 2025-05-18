@@ -28,6 +28,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { UserService } from '~/services/UserService'
+import { MemberService } from '~/services/MemberService'
 import FamilyTree from '~/components/FamilyTree.vue';
 const personA = ref(null)
 const personB = ref(null)
@@ -48,7 +49,7 @@ const findRelationship = () => {
     console.log('Finding relationship between:', personA.value, personB.value)
     const query = `?person_a=${personA.value}&person_b=${personB.value}`
     findingRelation.value = true
-    UserService.findRelationship(query)
+    MemberService.findRelationship(query)
         .then((response) => {
             if (response?.tree && Object.keys(response.tree).length) {
                 rootNode.value = response.tree
@@ -67,7 +68,7 @@ const findRelationship = () => {
 const getPersonUsersA = async (search = '') => {
     userLoading.value = true
     const query = search.length ? `?query=${search}` : ''
-    UserService.getAll(query)
+    MemberService.getAll(query)
         .then((response) => {
             personAUsers.value = response.data
         })
@@ -81,7 +82,7 @@ const getPersonUsersA = async (search = '') => {
 const getPersonUsersB = async (search = '') => {
     userLoading.value = true
     const query = search.length ? `?query=${search}` : ''
-    UserService.getAll(query)
+    MemberService.getAll(query)
         .then((response) => {
             personBUsers.value = response.data
         })

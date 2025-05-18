@@ -82,8 +82,8 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { UserService } from '~/services/UserService'
 import { useDisplay } from 'vuetify'
+import { MemberService } from '~/services/MemberService'
 
 const { mdAndUp } = useDisplay()
 const form = ref(null)
@@ -146,7 +146,7 @@ const searchQuery = '&gender='
 const getAllMothers = async (search = '') => {
 
     const query = search.length ? `?query=${search}&gender=female` : ''
-    UserService.getAll(query)
+    MemberService.getAll(query)
         .then((response) => {
             console.log(response.data, 'response');
             mothersData.value = response.data
@@ -162,7 +162,7 @@ const getAllMothers = async (search = '') => {
 const getAllFathers = async (search = '') => {
 
     const query = search.length ? `?query=${search}&gender=male` : ''
-    UserService.getAll(query)
+    MemberService.getAll(query)
         .then((response) => {
             fathersData.value = response.data
         })
@@ -198,7 +198,7 @@ const validate = async () => {
 }
 const saveNewFamilyMember = async () => {
     loading.value = true
-    UserService.create(userData.value)
+    MemberService.create(userData.value)
         .then((response) => {
             console.log(response);
         })

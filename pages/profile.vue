@@ -1,17 +1,16 @@
 <template>
     <section>
         <client-only>
-        <AddNewFamilyMember />
+        <Profile />
     </client-only>
     </section>
 </template>
 
 
 <script setup>
-import AddNewFamilyMember from '~/components/AddNewFamilyMember.vue';
+import Profile from '~/components/Profile.vue';
 definePageMeta({
     layout: "default",
-    middleware: 'auth'
 });
 </script>
 
