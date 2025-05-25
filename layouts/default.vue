@@ -4,7 +4,7 @@
             <v-app-bar-title class="d-flex flex-column">
                 <div class="d-flex align-center">
                     <v-list>
-                        <v-list-item :subtitle="'History & connections'" :title="'KS Family'">
+                        <v-list-item :subtitle="'History & connections'" :title="'KS Family'" to="/dashboard">
                             <template v-slot:prepend>
                                 <v-avatar :color="'blue'" src>
                                     <v-img alt="John" src="/logo.jpg"></v-img>
