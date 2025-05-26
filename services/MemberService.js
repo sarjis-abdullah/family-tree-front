@@ -30,6 +30,16 @@ export class MemberService {
       throw err;
     }
   }
+  static async update(payload, query='') {
+    const data = {...payload};
+    delete data.id;
+    const path = `member/${payload.id}${query}`;
+    try {
+      return await HttpRequester.put(path, data);
+    } catch (err) {
+      throw err;
+    }
+  }
   static async delete(id) {
     try {
       return await HttpRequester.delete('member/' + id);

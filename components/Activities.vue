@@ -7,12 +7,18 @@
       <!-- <v-icon color="red" @click="deleteItem(item)">mdi-delete</v-icon> -->
     </template>
   </v-data-table-server>
+  <v-dialog v-model="editModal" width="600">
+    <EditMember @close="editModal = false" @member-updated="handleMemberUpdate" :resource="resource">
+
+    </EditMember>
+  </v-dialog>
 </template>
 <script setup>
 import { ref } from 'vue'
 import { MemberService } from '~/services/MemberService'
 import { useAuth } from '@/composables/useAuth'
 import { formatDate, fromNow, isAfter } from '@/utils/date'
+import EditMember from './EditMember.vue';
 
 const { isAuthenticated, authUser, hasAuthUserMembership } = useAuth()
 const desserts = [
@@ -119,6 +125,7 @@ const FakeAPI = {
     })
   },
 }
+const resource = ref({})
 const itemsPerPage = ref(5)
 const headers = ref([
   {
@@ -138,10 +145,11 @@ const headers = ref([
 const search = ref('')
 const serverItems = ref([])
 const loading = ref(true)
+const editModal = ref(false)
 const totalItems = ref(0)
 
 const searchQuery = computed(() => {
-  let query = `?page=1&per_page=${itemsPerPage.value}&include=user.father,user.mother`
+  let query = `?page=1&per_page=${itemsPerPage.value}&include=m.father,m.mother`
 
   if (authUser.value) {
     query += `&created_by=${authUser.value.id}`
@@ -162,12 +170,31 @@ function loadItems({ page, itemsPerPage, sortBy }) {
 function editItem(item) {
   // Open dialog or navigate to edit page
   console.log('Edit', item)
+  editModal.value = true
+  resource.value = item
 }
 function deleteItem(item) {
   if (confirm(`Are you sure you want to delete ${item.name}?`)) {
     // API call or action
     console.log('Delete', item)
   }
+}
+const handleMemberUpdate = (updatedMember) => {
+  // Update the serverItems with the updated member
+  serverItems.value = serverItems.value.map(item => {
+    if (item.id === updatedMember.id) {
+      return {
+        ...item,
+        ...updatedMember,
+        mother: updatedMember.mother || item.mother,
+        father: updatedMember.father || item.father,
+        death_date: updatedMember.death_date ? formatDate(updatedMember.death_date) : '',
+        birth_date: updatedMember.birth_date ? formatDate(updatedMember.birth_date) : '',
+      }
+    }
+    return item
+  })
+  editModal.value = false
 }
 
 watch(
@@ -180,8 +207,8 @@ watch(
       serverItems.value = res?.data?.map(i => {
         return {
           ...i,
-          mother: i?.mother?.name,
-          father: i?.father?.name,
+          mother: i?.mother,
+          father: i?.father,
           death_date: i.death_date ? formatDate(i.death_date) : '',
           birth_date: i.birth_date ? formatDate(i.birth_date) : '',
           created_at: i.birth_date ? formatDate(i.birth_date) : ''

@@ -51,7 +51,7 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-btn color="deep-purple-lighten-2" text="Edit" block border @click="reserve"></v-btn>
+      <v-btn color="deep-purple-lighten-2" text="Edit" block @click="reserve"></v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -81,7 +81,7 @@ const member = ref()
 
 onMounted(async () => {
   if (authUser.value.id) {
-    const query = '?include=user.created_by&membership_type=own&created_by=' + authUser.value.id
+    const query = '?include=m.mother,m.father,user.created_by&membership_type=own&created_by=' + authUser.value.id
     const res = await MemberService.getAll(query)
     member.value = res?.data?.length ? res.data[0] : null
   }
