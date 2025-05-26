@@ -200,6 +200,8 @@
 import { ref } from 'vue'
 import { useDisplay } from 'vuetify'
 import { MemberService } from '~/services/MemberService'
+import { formatDate } from '@/utils/date'
+
 import { useAuth } from '@/composables/useAuth'
 
 const { isAuthenticated, authUser, hasAuthUserMembership } = useAuth()
@@ -256,7 +258,7 @@ const userData = computed(() => {
         mother_id: motherId.value,
         father_id: fatherId.value,
         gender: gender.value.toLocaleLowerCase(),
-        birth_date: birthDate.value ? new Date(birthDate.value).toISOString().substring(0, 10) : null,
+        birth_date: birthDate.value ? formatDate(birthDate.value) : null,
         membership_type: tab.value == 'my-membership' ? 'own' : 'family',
     }
 })

@@ -8,10 +8,10 @@ dayjs.extend(timezone)
 dayjs.extend(relativeTime)
 
 // Set your app's default timezone if needed
-// dayjs.tz.setDefault('Asia/Dhaka')
+dayjs.tz.setDefault('Asia/Dhaka')
 
 export function formatDate(date, format = 'YYYY-MM-DD') {
-  return dayjs(date).format(format)
+  return dayjs(date).tz('Asia/Dhaka').format(format)
 }
 
 export function formatDateTime(date, format = 'YYYY-MM-DD HH:mm:ss') {
