@@ -12,6 +12,7 @@
 import AddNewFamilyMember from '~/components/AddNewFamilyMember.vue';
 definePageMeta({
     layout: "default",
+    middleware: "auth"
 });
 
 const tab = ref(1)

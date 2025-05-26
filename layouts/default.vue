@@ -1,5 +1,5 @@
 <template>
-    <v-app>
+    <v-app v-if="isAuthenticated">
         <v-app-bar app-bar>
             <v-app-bar-title class="d-flex flex-column">
                 <div class="d-flex align-center">
@@ -72,6 +72,9 @@ import { useDisplay } from 'vuetify'
 const { mdAndUp } = useDisplay()
 import { useAuth } from '@/composables/useAuth'
 
+definePageMeta({
+    middleware: "auth"
+});
 const { isAuthenticated, authUser, hasAuthUserMembership } = useAuth()
 
 const profileNavs = computed(() => {

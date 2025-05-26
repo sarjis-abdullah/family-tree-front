@@ -16,33 +16,25 @@
             <v-card :class="mdAndUp ? 'flat elevation-2' : 'elevation-0 border-0'" class="pa-4 pa-md-8">
 
                 <header density="flat" class="mb-6">
-                    <h3 class="text-h6 font-weight-medium text-center">Register your information</h3>
+                    <nuxt-link to="/login" class="text-primary text-caption">
+                            <v-icon class="mr-2" size="24">mdi-arrow-left</v-icon>
+                        </nuxt-link>
+                    <h3 class="text-h6 font-weight-medium text-center">
+                        
+                        Forgotten your password?
+                    </h3>
                 </header>
+                <figure  class="mb-4 text-center">
+                    <v-avatar class="mb-4 text-center" size="100" color="primary">
+                    <v-img src="/forgetpassword.png" alt="KS Family Logo"></v-img>
+                </v-avatar>
+                </figure>
 
                 <v-form ref="form" @submit.prevent="validate()" lazy-validation>
-                    <v-text-field v-model="name" :rules="nameRules" label="Name" required
-                        prepend-inner-icon="mdi-account" variant="solo">
-                        <template #label>
-                            Name <span class="text-red">*</span>
-                        </template>
-                    </v-text-field>
                     <v-text-field v-model="email" :rules="emailRules" label="Email" required
                         prepend-inner-icon="mdi-mail" variant="solo">
                         <template #label>
                             Email <span class="text-red">*</span>
-                        </template>
-                    </v-text-field>
-                    
-                    <v-text-field type="password" v-model="password" :rules="passwordRules" label="Password" required
-                        prepend-inner-icon="mdi-shield-key" variant="solo" class="mt-2">
-                        <template #label>
-                            Password <span class="text-red">*</span>
-                        </template>
-                    </v-text-field>
-                    <v-text-field type="password" v-model="cPassword" :rules="cPasswordRules" label="Password" required
-                        prepend-inner-icon="mdi-lock" variant="solo" class="mt-2">
-                        <template #label>
-                            Confirm Password <span class="text-red">*</span>
                         </template>
                     </v-text-field>
 
@@ -51,17 +43,12 @@
                         <v-btn class="order-1 order-md-2" size="large" style="width: 100%;" color="primary"
                             type="submit" :loading="loading">
 
-                            Register
+                            Submit
                             <v-icon class="ml-2" start>mdi-arrow-right</v-icon>
                         </v-btn>
                     </div>
                 </v-form>
             </v-card>
-            <p class="text-center text-sm mt-4">Alread have an account?<br>
-                <nuxt-link to="/login" class="font-bold text-base text-primary-600 hover:text-primary-500">
-                    Login here
-                </nuxt-link>
-            </p>
         </v-col>
     </v-row>
 
@@ -70,101 +57,65 @@
 import { ref } from 'vue'
 import { UserService } from '~/services/UserService'
 import { useDisplay } from 'vuetify'
+import { saveToken, saveUser } from '~/storage/tokenStorage'
 
 const { mdAndUp } = useDisplay()
 const form = ref(null)
 
-const genders = [
-    'Male',
-    'Female',
-]
-
 const email = ref('')
-const cPassword = ref()
-const name = ref('')
 const password = ref()
-const motherId = ref()
-const fatherId = ref()
-const birthDate = ref()
 const emailRules = ref([
     v => !!v || 'Email is required',
-    // v => (v && v.length >= 3) || 'Name must be 3 characters atleast',
-])
-const nameRules = ref([
-    v => !!v || 'Name is required',
-    // v => (v && v.length >= 3) || 'Name must be 3 characters atleast',
 ])
 const passwordRules = ref([
     v => !!v || 'Password is required',
 ])
-const cPasswordRules = computed(() => {
-    return [
-        v => !!v || 'Confirm password is required',
-        v => (v && v === password.value) || 'Password mismatch',
-    ]
-})
-// const motherRules = ref([
-//     v => !!v || 'Mother name is required',
-// ])
-// const fatherRules = ref([
-//     v => !!v || 'Father name is required',
-// ])
 const gender = ref('')
 const loading = ref(false)
 const showInfo = computed(() => {
     return gender.value && gender.value.toLowerCase() === 'female'
-})
-const motherRules = computed(() => {
-    return []
-})
-
-const fatherRules = computed(() => {
-    return !showInfo.value
-        ? [(v) => !!v || 'Father name is required']
-        : []
 })
 
 const userData = computed(() => {
     return {
         email: email.value,
         password: password.value,
-        name: name.value,
     }
 })
 
 onMounted(() => {
     reset()
 })
-const motherDataLoading = ref(false)
-const fathersDataLoading = ref(false)
 
 const validate = async () => {
-    console.log(form.value);
     const { valid } = await form.value.validate()
 
-    if (valid) register()
+    if (valid) login()
 }
-const register = async () => {
+const router = useRouter()
+const login = async () => {
     loading.value = true
-    UserService.register(userData.value)
+    UserService.login(userData.value, '?include=user.members')
         .then((response) => {
             console.log(response);
-            reset()
+            if (response.accessToken) {
+                saveToken(response.accessToken)
+                saveUser(response.user)
+                window.location.href = '/dashboard'
+                // router.push({ name: 'dashboard' })
+            }
         })
         .catch((error) => {
             console.error(error);
         })
         .finally(() => {
             loading.value = false
+            reset()
         })
 }
-const onInfoClick = () => {
 
-}
 function reset() {
     form.value.reset()
-    motherId.value = null
-    fatherId.value = null
 }
 function resetValidation() {
     form.value.resetValidation()

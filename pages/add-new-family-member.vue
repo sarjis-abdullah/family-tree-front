@@ -10,6 +10,7 @@
 import AddNewFamilyMember from '~/components/AddNewFamilyMember.vue';
 definePageMeta({
     layout: "default",
+    middleware: "auth"
 });
 </script>
 

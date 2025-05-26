@@ -16,27 +16,22 @@
             <v-card :class="mdAndUp ? 'flat elevation-2' : 'elevation-0 border-0'" class="pa-4 pa-md-8">
 
                 <header density="flat" class="mb-6">
-                    <h3 class="text-h6 font-weight-medium text-center">Register your information</h3>
+                    <h3 class="text-h6 font-weight-medium text-center">Reset your password
+                    </h3>
                 </header>
 
                 <v-form ref="form" @submit.prevent="validate()" lazy-validation>
-                    <v-text-field v-model="name" :rules="nameRules" label="Name" required
-                        prepend-inner-icon="mdi-account" variant="solo">
-                        <template #label>
-                            Name <span class="text-red">*</span>
-                        </template>
-                    </v-text-field>
-                    <v-text-field v-model="email" :rules="emailRules" label="Email" required
+                    <!-- <v-text-field v-model="email" :rules="emailRules" label="Email" required
                         prepend-inner-icon="mdi-mail" variant="solo">
                         <template #label>
                             Email <span class="text-red">*</span>
                         </template>
-                    </v-text-field>
+                    </v-text-field> -->
                     
                     <v-text-field type="password" v-model="password" :rules="passwordRules" label="Password" required
                         prepend-inner-icon="mdi-shield-key" variant="solo" class="mt-2">
                         <template #label>
-                            Password <span class="text-red">*</span>
+                            New Password <span class="text-red">*</span>
                         </template>
                     </v-text-field>
                     <v-text-field type="password" v-model="cPassword" :rules="cPasswordRules" label="Password" required
@@ -51,13 +46,13 @@
                         <v-btn class="order-1 order-md-2" size="large" style="width: 100%;" color="primary"
                             type="submit" :loading="loading">
 
-                            Register
+                            Confirm
                             <v-icon class="ml-2" start>mdi-arrow-right</v-icon>
                         </v-btn>
                     </div>
                 </v-form>
             </v-card>
-            <p class="text-center text-sm mt-4">Alread have an account?<br>
+            <p class="text-center text-sm mt-4">Want to login?<br>
                 <nuxt-link to="/login" class="font-bold text-base text-primary-600 hover:text-primary-500">
                     Login here
                 </nuxt-link>
@@ -124,11 +119,13 @@ const fatherRules = computed(() => {
         : []
 })
 
+const route = useRoute()
 const userData = computed(() => {
     return {
-        email: email.value,
+        email: route.query.email || route.params.email || '',
+        token: route.query.token || route.params.token || '',
         password: password.value,
-        name: name.value,
+        confirmPassword: cPassword.value,
     }
 })
 
@@ -146,7 +143,7 @@ const validate = async () => {
 }
 const register = async () => {
     loading.value = true
-    UserService.register(userData.value)
+    UserService.resetPassword(userData.value)
         .then((response) => {
             console.log(response);
             reset()

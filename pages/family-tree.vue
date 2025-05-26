@@ -12,6 +12,7 @@ import { UserService } from '~/services/UserService'
 
 definePageMeta({
     layout: "default",
+    middleware: "auth"
 });
 const rootNode = ref({})
 const loadUsers = async () => {

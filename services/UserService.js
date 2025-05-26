@@ -37,6 +37,13 @@ export class UserService {
       throw err;
     }
   }
+  static async resetPassword(data) {
+    try {
+      return await HttpRequester.post('reset-password', data);
+    } catch (err) {
+      throw err;
+    }
+  }
   static async login(data, query='') {
     try {
       let url = 'login';

@@ -34,9 +34,9 @@
                         </template>
                     </v-text-field>
                     <div class="text-right">
-                        <a href="/forgot-password" class="text-primary text-caption">
+                        <nuxt-link to="/request-password" class="text-primary text-caption">
                             Forgot Password?
-                        </a>
+                        </nuxt-link>
                     </div>
 
 

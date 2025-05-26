@@ -1,17 +1,16 @@
 <template>
     <section>
         <client-only>
-        <Profile />
+        <Login />
     </client-only>
     </section>
 </template>
 
 
 <script setup>
-import Profile from '~/components/Profile.vue';
+import Login from '~/components/RequestPassword.vue';
 definePageMeta({
-    layout: "default",
-    middleware: "auth"
+    layout: "",
 });
 </script>
 

@@ -1,17 +1,16 @@
 <template>
     <section>
         <client-only>
-        <Profile />
+        <ResetPassword />
     </client-only>
     </section>
 </template>
 
 
 <script setup>
-import Profile from '~/components/Profile.vue';
+import ResetPassword from '~/components/ResetPassword.vue';
 definePageMeta({
-    layout: "default",
-    middleware: "auth"
+    layout: "",
 });
 </script>
 
