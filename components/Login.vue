@@ -101,14 +101,14 @@ const validate = async () => {
 const router = useRouter()
 const login = async () => {
     loading.value = true
-    UserService.login(userData.value, '?include=user.members')
+    UserService.login(userData.value, '?include=user.members,user.roles')
         .then((response) => {
             console.log(response);
             if (response.accessToken) {
                 saveToken(response.accessToken)
                 saveUser(response.user)
-                // window.location.href = '/dashboard'
-                router.push({ name: 'dashboard' })
+                window.location.href = '/dashboard'
+                // router.push({ name: 'dashboard' })
             }
         })
         .catch((error) => {

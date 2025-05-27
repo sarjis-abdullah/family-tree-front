@@ -1,9 +1,35 @@
 <template>
   <v-data-table-server v-model:items-per-page="perPage" :headers="headers" :items="serverItems"
-    :items-length="totalItems" :loading="loading" :search="search" item-value="name" @update:options="loadItems" :items-per-page-options="[30, 50, 100]">
-
+    :items-length="totalItems" :loading="loading" :search="search" item-value="name" @update:options="loadItems"
+    :items-per-page-options="[30, 50, 100]">
+    <template v-slot:item.status="{ item }">
+      <v-chip :color="item.status === 'active' ? 'green' : 'red'" dark>
+        {{ item.status }}
+      </v-chip>
+    </template>
+    <template v-slot:item.email_verified_at="{ item }">
+      <span v-if="item.email_verified_at">{{ formatDate(item.email_verified_at) }}</span>
+      <v-chip v-else :color="'red'" dark>
+        Not Verified
+      </v-chip>
+    </template>
+    <template v-slot:item.created_at="{ item }">
+      <span v-if="item.created_at">{{ formatDate(item.created_at) }}</span>
+    </template>
     <template #item.actions="{ item }">
-      <v-icon icon @click="editItem(item)">mdi-pencil</v-icon>
+      <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
+            </template>
+
+            <v-list>
+              <v-list-item
+              @click="updateActivation(item)"
+              >
+                <v-list-item-title>{{ item.status === 'active' ? 'Deactivate' : 'Activate' }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
       <!-- <v-icon color="red" @click="deleteItem(item)">mdi-delete</v-icon> -->
     </template>
   </v-data-table-server>
@@ -19,6 +45,7 @@ import { MemberService } from '~/services/MemberService'
 import { useAuth } from '@/composables/useAuth'
 import { formatDate, fromNow, isAfter } from '@/utils/date'
 import EditMember from './EditMember.vue';
+import { UserService } from '~/services/UserService';
 
 const { isAuthenticated, authUser, hasAuthUserMembership } = useAuth()
 const resource = ref({})
@@ -29,12 +56,10 @@ const headers = ref([
     sortable: false,
     key: 'name',
   },
-  { title: 'Gender', key: 'gender', align: 'end' },
-  { title: 'Father', key: 'father', align: 'end' },
-  { title: 'Mother', key: 'mother', align: 'end' },
-  { title: 'Birth date', key: 'birth_date', align: 'end' },
-  { title: 'Death date', key: 'death_date', align: 'end' },
-  { title: 'Created at', key: 'created_at', align: 'end' },
+  { title: 'Email', key: 'email', align: 'end' },
+  { title: 'Status', key: 'status', align: 'end' },
+  { title: 'Verified At', key: 'email_verified_at', align: 'end' },
+  { title: 'Created AT', key: 'created_at', align: 'end' },
   { title: 'Actions', key: 'actions', align: 'end' },
 ])
 const search = ref('')
@@ -47,10 +72,10 @@ const perPage = ref(10)
 const sortBy = ref('name')
 
 const searchQuery = computed(() => {
-  let query = `?page=${pageCount.value}&per_page=${perPage.value}&include=m.father,m.mother`
+  let query = `?page=${pageCount.value}&per_page=${perPage.value}`
 
   if (authUser.value) {
-    query += `&created_by=${authUser.value.id}`
+    // query += `&created_by=${authUser.value.id}`
   }
   return query
 })
@@ -88,23 +113,35 @@ const handleMemberUpdate = (updatedMember) => {
   })
   editModal.value = false
 }
+const updateActivation = async (item) => {
+  try {
+    const response = await UserService.update(item.id, {
+      status: item.status === 'active' ? 'inactive' : 'active'
+    })
+    if (response?.data) {
+      // Update the local state
+      serverItems.value = serverItems.value.map(user => {
+        if (user.id === item.id) {
+          return {
+            ...user,
+            status: response.data.status
+          }
+        }
+        return user
+      })
+    }
+  } catch (error) {
+    console.error('Error updating user activation:', error)
+  }
+}
 
 watch(
   searchQuery,
   async (newVal, oldVal) => {
     console.log('Search query changed:', newVal)
     try {
-      const res = await MemberService.getAll(searchQuery.value)
-      serverItems.value = res?.data?.map(i => {
-        return {
-          ...i,
-          mother: i?.mother,
-          father: i?.father,
-          death_date: i.death_date ? formatDate(i.death_date) : '',
-          birth_date: i.birth_date ? formatDate(i.birth_date) : '',
-          created_at: i.birth_date ? formatDate(i.birth_date) : ''
-        }
-      })
+      const res = await UserService.getAll(searchQuery.value)
+      serverItems.value = res?.data
       totalItems.value = res?.meta?.total || 0
     } catch (error) {
 

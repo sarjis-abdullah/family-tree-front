@@ -72,17 +72,19 @@ import { useDisplay } from 'vuetify'
 const { mdAndUp } = useDisplay()
 import { useAuth } from '@/composables/useAuth'
 
-definePageMeta({
-    middleware: "auth"
-});
 const { isAuthenticated, authUser, hasAuthUserMembership } = useAuth()
 
 const profileNavs = computed(() => {
-    return [
+    const navs = [
         {
             title: 'Profile',
             icon: 'mdi-account-circle',
             to: '/profile'
+        },
+        {
+            title: 'Users',
+            icon: 'mdi-account-multiple',
+            to: '/users'
         },
         {
             title: 'Your members',
@@ -95,6 +97,11 @@ const profileNavs = computed(() => {
             to: '/logout'
         }
     ]
+
+    if (!isAuthenticated.value) {
+        return navs.filter(nav => nav.title !== 'Users')
+    }
+    return navs
 })
 const navs = computed(() => {
     return [
