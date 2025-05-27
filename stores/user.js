@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { UserService } from "~/services/UserService";
 
-export const useBranchStore = defineStore("user", {
+export const useUserStore = defineStore("user", {
   state: () => ({
     users: [],
     selectedUser: null,
