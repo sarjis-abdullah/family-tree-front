@@ -1,11 +1,11 @@
 <template>
     <section>
-        <Activities />
+        <Members />
     </section>
 </template>
 
 <script setup>
-import Activities from '~/components/Activities.vue';
+import Members from '~/components/Members.vue';
 definePageMeta({
     layout: "default",
     middleware: "auth"

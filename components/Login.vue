@@ -107,8 +107,8 @@ const login = async () => {
             if (response.accessToken) {
                 saveToken(response.accessToken)
                 saveUser(response.user)
-                window.location.href = '/dashboard'
-                // router.push({ name: 'dashboard' })
+                // window.location.href = '/dashboard'
+                router.push({ name: 'dashboard' })
             }
         })
         .catch((error) => {

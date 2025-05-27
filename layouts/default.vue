@@ -1,5 +1,5 @@
 <template>
-    <v-app v-if="isAuthenticated">
+    <v-app>
         <v-app-bar app-bar>
             <v-app-bar-title class="d-flex flex-column">
                 <div class="d-flex align-center">
@@ -29,7 +29,7 @@
                 <!-- Mobile -->
                 <template>
                     <div class="text-center">
-                        <v-menu>
+                        <v-menu v-if="isAuthenticated">
                             <template v-slot:activator="{ props }">
                                 <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
                             </template>
