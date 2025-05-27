@@ -44,6 +44,13 @@ export class UserService {
       throw err;
     }
   }
+  static async forgetPassword(data) {
+    try {
+      return await HttpRequester.post('forgot-password', data);
+    } catch (err) {
+      throw err;
+    }
+  }
   static async login(data, query='') {
     try {
       let url = 'login';

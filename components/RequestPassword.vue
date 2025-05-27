@@ -17,20 +17,20 @@
 
                 <header density="flat" class="mb-6">
                     <nuxt-link to="/login" class="text-primary text-caption">
-                            <v-icon class="mr-2" size="24">mdi-arrow-left</v-icon>
-                        </nuxt-link>
+                        <v-icon class="mr-2" size="24">mdi-arrow-left</v-icon>
+                    </nuxt-link>
                     <h3 class="text-h6 font-weight-medium text-center">
-                        
+
                         Forgotten your password?
                     </h3>
                 </header>
-                <figure  class="mb-4 text-center">
+                <figure class="mb-4 text-center">
                     <v-avatar class="mb-4 text-center" size="100" color="primary">
-                    <v-img src="/forgetpassword.png" alt="KS Family Logo"></v-img>
-                </v-avatar>
+                        <v-img src="/forgetpassword.png" alt="KS Family Logo"></v-img>
+                    </v-avatar>
                 </figure>
 
-                <v-form ref="form" @submit.prevent="validate()" lazy-validation>
+                <v-form ref="form" @submit.prevent="validate()" lazy-validation v-if="!isEmailSent && !errorText">
                     <v-text-field v-model="email" :rules="emailRules" label="Email" required
                         prepend-inner-icon="mdi-mail" variant="solo">
                         <template #label>
@@ -48,6 +48,15 @@
                         </v-btn>
                     </div>
                 </v-form>
+                <v-alert v-if="isEmailSent" type="success" class="mt-4">
+                    An email has been sent to your registered email address with instructions to reset your password.
+                </v-alert>
+                <v-alert v-if="errorText" type="error" class="mt-4" @click="()=> {
+                    errorText = ''
+                    email = ''
+                }">
+                    {{errorText}}
+                </v-alert>
             </v-card>
         </v-col>
     </v-row>
@@ -79,7 +88,6 @@ const showInfo = computed(() => {
 const userData = computed(() => {
     return {
         email: email.value,
-        password: password.value,
     }
 })
 
@@ -92,21 +100,17 @@ const validate = async () => {
 
     if (valid) login()
 }
-const router = useRouter()
+const isEmailSent = ref(false)
+const errorText = ref(false)
 const login = async () => {
     loading.value = true
-    UserService.login(userData.value, '?include=user.members')
+    UserService.forgetPassword(userData.value)
         .then((response) => {
-            console.log(response);
-            if (response.accessToken) {
-                saveToken(response.accessToken)
-                saveUser(response.user)
-                window.location.href = '/dashboard'
-                // router.push({ name: 'dashboard' })
-            }
+            isEmailSent.value = true
+
         })
         .catch((error) => {
-            console.error(error);
+            errorText.value = error.status
         })
         .finally(() => {
             loading.value = false
